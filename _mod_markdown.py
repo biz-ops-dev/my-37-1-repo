@@ -1,15 +1,4 @@
-"""
-Write about
-  how allow for multiple input files
-   - list extend (not append)
-
-   main() at end
-
-Future:
-  option to remove terms from old file
-  # is it ok to have a class without any init methods?
-"""
-
+# created for iuse in "practice" folder
 
 from bs4 import BeautifulSoup
 import markdown
@@ -23,7 +12,7 @@ class ObtainMarkdownData:
     """ Obtain data from Markdown"""
 
     @staticmethod
-    def obtain_all_infile_data(file_path) -> str :
+    def obtain_all_infile_data(file_path: ['file1', 'file2']) -> str :
         """
         Obtain the contents of a markdown file with the markdown extension _def_list
         
@@ -51,6 +40,41 @@ class ObtainMarkdownData:
         """
         Input:
         Output: dictionary with a key pair of the term (dt) and a list of definitions (dd) """
+        soup = BeautifulSoup(def_list_content, "html.parser")
+        dl_tags = soup.find_all("dl")  # find all <dl> tags in the document
+        dt_dd_pairs = []  # list of tuples to track dt and dd pairs
+
+        for dl_tag in dl_tags:
+            current_dt = None  # flag to track current dt
+            current_dd_list = []  # list of strings to track multiple definitions
+
+            for tag in dl_tag.children:
+                if tag.name == "dt":
+                    if current_dt is not None and current_dd_list:
+                        dt_dd_pairs.append((current_dt, current_dd_list))
+                    current_dt = tag.text.strip()
+                    current_dd_list = []
+                elif tag.name == "dd" and current_dt is not None:
+                    current_dd_list.append(tag.text.strip())
+
+            if current_dt is not None and current_dd_list:
+                dt_dd_pairs.append((current_dt, current_dd_list))
+
+        dictionary_dt_listof_dd = dict(dt_dd_pairs)
+        return dictionary_dt_listof_dd
+    
+    @staticmethod
+    def extract_dict_items_direct_from_file(file_path: ['file1', 'file2']) -> dict:
+        """
+        Eliminate need of 'def obtain_all_infile_data'
+
+        
+        Input:
+        Output: dictionary with a key pair of the term (dt) and a list of definitions (dd)
+        """
+
+        def_list_content = ObtainMarkdownData.obtain_all_infile_data(file_path)
+        
         soup = BeautifulSoup(def_list_content, "html.parser")
         dl_tags = soup.find_all("dl")  # find all <dl> tags in the document
         dt_dd_pairs = []  # list of tuples to track dt and dd pairs

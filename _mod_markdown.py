@@ -1,4 +1,4 @@
-# created for iuse in "practice" folder
+
 
 from bs4 import BeautifulSoup
 import markdown
@@ -9,79 +9,27 @@ from markdown.extensions.toc import TocExtension
 import datetime
 
 class ObtainMarkdownData:
-    """ Obtain data from Markdown"""
-
+    "Obtain data from Markdown file"
+       
     @staticmethod
-    def obtain_all_infile_data(file_path: ['file1', 'file2']) -> str :
+    def dictionary_items(file_path: ['file1', 'file2']) -> dict:
         """
-        Obtain the contents of a markdown file with the markdown extension _def_list
-        
-        Input: string or list of strings of filenames of markdown file
-        Output: String containing all content from inputted files formatted with a def_list parser (happens to be functional well beyond def lists)
-        Dependencies: markdown.extensions.def_list
-        """
-
-        list_of_content = []
-    
-        for file_path in file_path:
-                with open(file_path, 'r') as file_obj:
-                    content = file_obj.read()
-                    def_list_content = [markdown.markdown(content, extensions=['markdown.extensions.def_list'])]
-
-                    # first wrong order but now fixed - extend 
-                    list_of_content.extend(def_list_content)
-
-        #New: make list into single string to process
-        string_list_of_content = ' '.join([str(item) for item in list_of_content])
-
-        return string_list_of_content
-    
-    def extract_dict_items(def_list_content) -> dict:
-        """
-        Input:
-        Output: dictionary with a key pair of the term (dt) and a list of definitions (dd) """
-        soup = BeautifulSoup(def_list_content, "html.parser")
-        dl_tags = soup.find_all("dl")  # find all <dl> tags in the document
-        dt_dd_pairs = []  # list of tuples to track dt and dd pairs
-
-        for dl_tag in dl_tags:
-            current_dt = None  # flag to track current dt
-            current_dd_list = []  # list of strings to track multiple definitions
-
-            for tag in dl_tag.children:
-                if tag.name == "dt":
-                    if current_dt is not None and current_dd_list:
-                        dt_dd_pairs.append((current_dt, current_dd_list))
-                    current_dt = tag.text.strip()
-                    current_dd_list = []
-                elif tag.name == "dd" and current_dt is not None:
-                    current_dd_list.append(tag.text.strip())
-
-            if current_dt is not None and current_dd_list:
-                dt_dd_pairs.append((current_dt, current_dd_list))
-
-        dictionary_dt_listof_dd = dict(dt_dd_pairs)
-        return dictionary_dt_listof_dd
-    
-    @staticmethod
-    def extract_dict_items_direct_from_file(file_path: ['file1', 'file2']) -> dict:
-        """
-        Eliminate need of 'def obtain_all_infile_data'
+        Eliminate need for user to run function 'def all_data'
 
         
-        Input:
+        Input: list of file or files
         Output: dictionary with a key pair of the term (dt) and a list of definitions (dd)
         """
 
-        def_list_content = ObtainMarkdownData.obtain_all_infile_data(file_path)
+        def_list_content = ObtainMarkdownData.all_data(file_path)
         
         soup = BeautifulSoup(def_list_content, "html.parser")
         dl_tags = soup.find_all("dl")  # find all <dl> tags in the document
         dt_dd_pairs = []  # list of tuples to track dt and dd pairs
 
         for dl_tag in dl_tags:
-            current_dt = None  # flag to track current dt
-            current_dd_list = []  # list of strings to track multiple definitions
+            current_dt = None  # flag
+            current_dd_list = []  # track multiple definitions
 
             for tag in dl_tag.children:
                 if tag.name == "dt":
@@ -97,8 +45,50 @@ class ObtainMarkdownData:
 
         dictionary_dt_listof_dd = dict(dt_dd_pairs)
         return dictionary_dt_listof_dd
+    
+    @staticmethod    
+    def dictionary_div(file_path) -> str:
+        """  
+        Obtain the contents of a "dictionary" div and return results as
+        1. html formatted string
+        """
 
-    def extract_list_items(content):
+        with open(file_path, 'r') as file:
+            soup = BeautifulSoup(file.read(), "html.parser")
+            dictionary_div = soup.find("div", class_="dictionary") # type <class 'bs4.element.Tag'>
+            dictionary_div_string = str(dictionary_div)
+
+            string_remove_div_header = dictionary_div_string.replace('<div class="dictionary">', '')
+            string_remove_div_footer = string_remove_div_header.replace('</div>', '')
+
+            def_list_content = markdown.markdown(string_remove_div_footer, extensions=['markdown.extensions.def_list'])
+            another_can_of_soup = BeautifulSoup(def_list_content, 'html.parser')
+                
+            # merge below object as this is basically duplicated
+
+            dl_tags = another_can_of_soup.find_all("dl")  # find all <dl> tags in the document
+            dt_dd_pairs = []  # list of tuples to track dt and dd pairs
+
+            for dl_tag in dl_tags:
+                current_dt = None  # flag
+                current_dd_list = []  # track multiple definitions
+
+                for tag in dl_tag.children:
+                    if tag.name == "dt":
+                        if current_dt is not None and current_dd_list:
+                            dt_dd_pairs.append((current_dt, current_dd_list))
+                        current_dt = tag.text.strip()
+                        current_dd_list = []
+                    elif tag.name == "dd" and current_dt is not None:
+                        current_dd_list.append(tag.text.strip())
+
+                if current_dt is not None and current_dd_list:
+                    dt_dd_pairs.append((current_dt, current_dd_list))
+
+            dictionary_dt_listof_dd = dict(dt_dd_pairs)
+            return dictionary_dt_listof_dd
+
+    def list_items(content):
         """Take content from the ?def-list-content? function and extract the list items"""
         soup = BeautifulSoup(content, "html.parser")
 
@@ -137,19 +127,48 @@ class ObtainMarkdownData:
 
         list_text = dict(list_item_pairs)
         return list_text
-
-    def string_formatted_div(file_path):
-        """ Obtain the contents of a "dictionary" div and return results as html
-        UNTESTED since moved into class
+    
+    @staticmethod
+    def all_data(file_path: ['file1', 'file2']) -> str :
         """
-        with open(file_path, 'r') as file:
-            soup = BeautifulSoup(file.read(), "html.parser")
-            plain_text_div = soup.find("div", class_="dictionary")
-            html_formatted_div = markdown.markdown(plain_text_div.get_text(), extensions=['markdown.extensions.def_list'])
-        return html_formatted_div
+        Obtain the contents of a markdown file with the markdown extension _def_list
+        
+        Input: list of string or strings containing names of markdown file
+        Output: String containing all content from inputted files formatted with a def_list parser (happens to be functional well beyond def lists)
+        Dependencies: markdown.extensions.def_list
+        """
 
-class WriteMarkdownData:
-    """ Write data to Markdown"""
+        list_of_content = []
+    
+        for file_path in file_path:
+                with open(file_path, 'r') as file_obj:
+                    content = file_obj.read()
+                    def_list_content = [markdown.markdown(content, extensions=['markdown.extensions.def_list'])]
+                    # first wrong order but now fixed - extend 
+                    list_of_content.extend(def_list_content)
+
+        #New: make list into single string to process
+        string_list_of_content = ' '.join([str(item) for item in list_of_content])
+        return string_list_of_content
+    
+class WriteToFile:
+    """Take data and write it to an output file"""
+    
+    def flashcard_deluxe(dictionary_text, output_file, def_number=1) -> ['file-no-liist-just-using-to-inc-string-here']:
+        """
+        input: dictionary of term and list of definition(s)
+        output: flashcard file on onedrive
+        Take the dictionary and write it to a tab deliminated file used for flashcards
+        """
+
+        flashcard_path = '/Users/pr-mbausr/Library/CloudStorage/OneDrive-Personal/Apps/Flashcards Deluxe/'
+        def_index = def_number-1
+
+        with open(flashcard_path + output_file, 'w') as textfile:
+            for key, value in dictionary_text.items():
+                textfile.write(f"{key}\t {value[def_index]}\n")
+        print(f'Item Count: {len(dictionary_text.keys())}')
+        print(f'File written to: {flashcard_path + output_file}')
     
     def backup_file(file_path):
         """ Create a backup file of the original markdown file before modifications"""
@@ -171,18 +190,8 @@ class WriteMarkdownData:
 
 
 class WriteNonMarkdown:
-    """ Write data to other files not markdown"""
+    """ Write data to other files non-markdown file"""
 
-    def flashcard_file(dictionary_text, output_file):
-        """ Take the dictionary and write it to a tab deliminated file used for flashcards.  Use the first definition in the list. """
-
-        flashcard_path = '/Users/pr-mbausr/Library/CloudStorage/OneDrive-Personal/Apps/Flashcards Deluxe/'
-
-        with open(flashcard_path + output_file, 'w') as textfile:
-            for key, value in dictionary_text.items():
-                textfile.write(f"{key}\t {value[0]}\n")
-        print(f'Item Count: {len(dictionary_text.keys())}')
-        print(f'File written to: {flashcard_path + output_file}')
 
 
 # add below to classes 
@@ -254,13 +263,13 @@ def extract_list_items(content):
     return list_text
 
 def main():
+    # pull from file
     file_path = input("Enter the file(s) to pull from: ")
     while not file_path:
         print("No file path provided. Please try again.")
         file_path = input("Enter the file path: ")
 
     # add intermediary steps to select what options to chose
-    print()
     output_flashcard_txtfile = input("Enter output file path for flashcards: ")
     while not output_flashcard_txtfile:
         print("No file path provided. Please try again.")

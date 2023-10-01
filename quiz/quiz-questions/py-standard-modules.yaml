@@ -1,0 +1,5 @@
+sys:
+  provides system-specific parameters and functions to set the path of the module you wish to implement
+
+add '/newfolder' to python path : sys.path.append('/usr/sammy/')
+determine system path: sys.path

@@ -1,0 +1,17 @@
+quiz_app_questions : |
+    [('Commit the current directiory with notes "notes"', 'git commit -m "notes"'),
+    ('Find the hash for a commit"', 'git log'),
+    ('Create a branch called "new-feature"', 'git branch new-feature'),
+    ('switch to a branch called "other-branch"', 'git checkout other-branch'),
+    ('delete a branch called "old-branch', 'git branch -d old-branch'),
+    ('obtain the status of the current repository', 'git status'),
+    ('add a file called "new.py" to the index', 'git add new.py'),
+    ('add all files in current directory to the index', 'git add --all')
+    ('create a new git repository in the current directory', 'git init'),]
+
+    # Note git init basic_scripts_repo created a new directory with git in that diectory not parent folder
+    #More git init : https://git-scm.com/docs/git-init
+
+hash (in git):
+  def : code that identifies each commit
+  command-obtain: 'git log'

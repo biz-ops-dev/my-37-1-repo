@@ -1,0 +1,27 @@
+bash commands:
+  list python files in curent directory that contain 4 characters : ls ????.py
+  list files in current directory and sort by date modified : ls -t
+  list only the files that start with "com.apple" : ls com.apple*
+  copy a directory dir1 to dir2 : cp -r directory1 directory2
+  list all "docx" files in current directory: ls *.docx
+  create a variable "y" that is the string "hi": y="hi"
+  Print filenames in pwd if "S" in  filename: ls | grep S
+  Print filenames in pwd if "S" not in filename: ls | grep -v S
+  List all docx files (current directory) : ls *.docx
+
+secondary:
+  list all files in directory and subdirectory modified in the last week : find . -ctime -7
+  navigate to the home directory: cd ~
+  another name for variable in zsh: parameter
+  print the variable "y": echo $y
+  List directories (current directory) : ls -d */
+
+questions:
+  find flag for modification: -mtime
+  find flag for creation: -ctime
+  find flag for access: -atime
+  find flag for metadata change: -crtime
+
+on-hold:
+  list all files in the directory modified in the last 3 days : find . -maxdepth 1 -ctime -3
+  list files in current directory and sort by size : ls -S

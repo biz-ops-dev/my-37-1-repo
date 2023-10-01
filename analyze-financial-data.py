@@ -18,16 +18,16 @@ class PublicCompany():
 
     def __init__(self, ticker: str):
         self.ticker = ticker
-        self.source_folder = '/Users/pr-mbausr/Library/CloudStorage/OneDrive-Personal/market data/public companies/1-json'
+        self.source_folder = f'/Users/pr-mbausr/Library/CloudStorage/OneDrive-Personal/market data/public companies/json/{self.ticker}'
         
+        self.secondbalancesheeet = self.SecondBalanceSheeet
         # Reports
-        self.balance_sheet = (json.load(open(f'{self.source_folder}/{self.ticker}/{today}-BALANCE_SHEET.json')))
-        self.income_statement = (json.load(open(f'{self.source_folder}/{self.ticker}/{today}-INCOME_STATEMENT.json')))
-        self.cash_flow = (json.load(open(f'{self.source_folder}/{self.ticker}/{today}-CASH_FLOW.json')))
-        self.earnings = (json.load(open(f'{self.source_folder}/{self.ticker}/{today}-EARNINGS.json')))
+        self.balance_sheet = (json.load(open(f'{self.source_folder}/{self.ticker}-BALANCE_SHEET-av.json')))
+        self.income_statement = (json.load(open(f'{self.source_folder}/{self.ticker}-INCOME_STATEMENT-av.json')))
+        self.cash_flow = (json.load(open(f'{self.source_folder}/{self.ticker}-CASH_FLOW-av.json')))
+        self.earnings = (json.load(open(f'{self.source_folder}/{self.ticker}-EARNINGS-av.json')))
 
         # Administration
-
 
         ## define dates
 
@@ -40,14 +40,18 @@ class PublicCompany():
         self.q_date_test = self.lastBSQreportDate == self.lastINSQreportDate == self.lastCFQreportDate
 
 
+        # Ratios
+        #self.DebtEquity = round(self.totalLiabilities / self.totalShareholderEquity, 2)
 
+        @dataclass
+        class SecondBalanceSheeet:
+            def __init__(self):
+                self.name = BalanceSheet
+
+    def some_line_items(self):
         # Line Items
         self.totalLiabilities = int(self.balance_sheet['quarterlyReports'][0]['totalLiabilities'])
         self.totalShareholderEquity = int(self.balance_sheet['quarterlyReports'][0]['totalShareholderEquity'])
-
-        # Ratios
-        self.DebtEquity = round(self.totalLiabilities / self.totalShareholderEquity, 2)
-
 
    
     @property
@@ -71,6 +75,8 @@ Ceridian = PublicCompany('CDAY')
 
 print(f'{WorkDay.lastBSQreportDate}\t{WorkDay.lastCFQreportDate}\t{WorkDay.lastINSQreportDate}')
 print(WorkDay.q_date_test)
+
+#print('{:,}'.format(WorkDay.totalLiabilities))
 
 
 '''

@@ -5,6 +5,7 @@ from markdown.extensions import md_in_html
 from markdown.extensions import sane_lists
 from markdown.extensions.toc import TocExtension
 import datetime
+import os
 
 class ObtainMarkdownData:
 
@@ -21,9 +22,13 @@ class ObtainMarkdownData:
         """
 
         if type(file_path) is str:
-            file_path = [file_path]
+            if os.path.isdir(file_path):
+                file_path = ObtainMarkdownData.get_md_files(file_path)
+            else:            
+                file_path = [file_path]
         else:
             pass
+        
 
         list_of_content = []
     
@@ -112,8 +117,88 @@ class ObtainMarkdownData:
 
             dictionary_dt_listof_dd = dict(dt_dd_pairs)
             return dictionary_dt_listof_dd
+        
+    @staticmethod
+    def get_md_files(directory_list):
+        md_files = []
+        for root, _, files in os.walk(directory_list):
+            for filename in files:
+                if filename.endswith('.md'):
+                    md_files.append(os.path.join(root, filename))
+        return md_files
 
+class formatMarkdownDictionary:
+    """ Format the dictionary for specific quiz or flashcards purposes"""
+
+    def format_dictionary(definition_dictionary) ->dict:
+        """ Format dictionary per instructions in the definition
+        q| {side1}, {keyword}, {optional additional terms - def2, 3, 4
+        returns dictionary with term being a list so it can be parsed for flashcards deluxe
+        }"""
+
+        dict_instructions = {}
+
+        for key, values in definition_dictionary.items():
+            for value in values:
+                if value.startswith('q|'):
+                    instructions = value.replace('q|', '').strip().split(',')
+                                       
+
+                    if len(instructions) < 2:
+                        first_side = instructions[0]
+                        keywords = 'no keywords'
+                    else:
+                        first_side = instructions[0]
+                        keywords = instructions[1]
+                    
+                    dict_instructions[key] = {
+                        'first-side' : first_side,
+                        'keywords' : keywords,
+                        #'additional' : additional,
+                        }
+
+        print('finstuctions \n', dict_instructions)
+                    
+        output_dict = {}
+        print(definition_dictionary)
+                    
+        for key, values in dict_instructions.items():
+            if values['first-side'] == '1':
+                output_dict[key] = {
+                    'side-1' : key,
+                    'side-2' : definition_dictionary[key][0],
+                }
+            if values['first-side'] == '2':
+                output_dict[key] = {
+                    'side-1' : definition_dictionary[key][0],
+                    'side-2' : key,
+                }
+            if values['first-side'] == 'b':
+                output_dict[key] = {
+                    'side-1' : key,
+                    'side-2' : definition_dictionary[key][0],
+                }
+                
+                output_dict[key + '_swapped'] = {
+                    'side-1': definition_dictionary[key][0],
+                    'side-2': key,
+                }
+
+        print('\n\n\n\n\noutput dict \n', output_dict)
+
+        second_output_dictionary = {value['side-1']: [value['side-2']] for value in output_dict.values()}
+
+
+        print('\n\n\nsecibd output dict \n', second_output_dictionary)
+
+        return second_output_dictionary
     
+
+
+                
+
+
+
 class WriteToFile:
     """Take data and write it to an output file"""
     
